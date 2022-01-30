@@ -34,7 +34,7 @@ const connectToMongo = async () => {
 connectToMongo().catch(console.dir);
 
 app.get("/api/users/register", async (req, res) => {
-  console.log("=== user register post api is called ===");
+  console.log("=== user register post api is called ===", req.query);
   let status = { success: false, msg: "Success" };
 
   if (!connectedDB) {
@@ -47,7 +47,7 @@ app.get("/api/users/register", async (req, res) => {
   const accountDoc = JSON.parse(req.query.data);
 
   // compare hash
-  const givenHash = req.headers["secret"];
+  const givenHash = JSON.parse(req.query.headers).secret;
   const calculatedHash = crypto
     .createHash("sha256")
     .update(accountDoc.email + "" + accountDoc.password)
@@ -100,7 +100,7 @@ app.get("/api/users/login", async (req, res) => {
   const accountPwd = req.query.password;
 
   // compare hash
-  const givenHash = req.headers["secret"];
+  const givenHash = req.query.headers;
   const calculatedHash = crypto
     .createHash("sha256")
     .update(accountEmail + "" + accountPwd)
