@@ -33,17 +33,18 @@ const connectToMongo = async () => {
 
 connectToMongo().catch(console.dir);
 
-app.post("/api/users/register", async (req, res) => {
+app.get("/api/users/register", async (req, res) => {
   console.log("=== user register post api is called ===");
-  let status = { success: false };
+  let status = { success: false, msg: "Success" };
 
   if (!connectedDB) {
     console.log("=== mongodb connection is not established yet ===");
+    status.msg = "Connection failed!";
     res.json(status);
     return;
   }
   const db = client.db("dottedai");
-  const accountDoc = req.body.user;
+  const accountDoc = JSON.parse(req.query.data);
 
   // compare hash
   const givenHash = req.headers["secret"];
@@ -57,6 +58,7 @@ app.post("/api/users/register", async (req, res) => {
 
   if (givenHash !== calculatedHash) {
     console.log("=== hash value is not the same in user register post api ===");
+    status.msg = "You arn't the correct account!";
     res.json(status);
     return;
   }
@@ -67,6 +69,7 @@ app.post("/api/users/register", async (req, res) => {
   });
   if (isDouble) {
     console.log("=== email exist ===");
+    status.msg = "Email Exist!";
     res.json(status);
     return;
   } else {
@@ -81,24 +84,26 @@ app.post("/api/users/register", async (req, res) => {
   }
 });
 
-app.post("/api/users/login", async (req, res) => {
-  console.log("=== account login post api is called ===");
+app.get("/api/users/login", async (req, res) => {
+  console.log("=== account login get api is called ===", req.query);
 
-  let status = { success: false };
+  let status = { success: false, msg: "Success" };
 
   if (!connectedDB) {
     console.log("=== mongodb connection is not established yet ===");
+    status.msg = "Connection failed!";
     res.json(status);
     return;
   }
   const db = client.db("dottedai");
-  const accountData = req.body.user;
+  const accountEmail = req.query.email;
+  const accountPwd = req.query.password;
 
   // compare hash
   const givenHash = req.headers["secret"];
   const calculatedHash = crypto
     .createHash("sha256")
-    .update(accountData.email + "" + accountData.password)
+    .update(accountEmail + "" + accountPwd)
     .digest("hex");
 
   console.log(givenHash);
@@ -109,14 +114,17 @@ app.post("/api/users/login", async (req, res) => {
       "=== hash value is not the same in account login post api ===",
       status
     );
+    status.msg = "You arn't the correct account!";
     res.json(status);
     return;
   }
 
   const accountCollection = db.collection("accounts");
 
+  const isDouble = await accountCollection.findOne({ email: accountEmail });
+
   const accountDoc = await accountCollection
-    .find({ email: accountData.email, password: accountData.password })
+    .find({ email: accountEmail, password: accountPwd })
     .toArray();
 
   console.log(accountDoc);
@@ -126,6 +134,11 @@ app.post("/api/users/login", async (req, res) => {
     status.success = true;
     res.json(status);
   } else {
+    if (isDouble) {
+      status.msg = "Please enter the correct password!";
+    } else {
+      status.msg = "Please enter the correct email!";
+    }
     res.json(status);
   }
 });
