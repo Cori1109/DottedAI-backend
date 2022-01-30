@@ -39,7 +39,7 @@ app.get("/api/users/register", async (req, res) => {
 
   if (!connectedDB) {
     console.log("=== mongodb connection is not established yet ===");
-    status.msg = "Connection failed!";
+    status.msg = "DB Connection failed!";
     res.json(status);
     return;
   }
@@ -58,7 +58,7 @@ app.get("/api/users/register", async (req, res) => {
 
   if (givenHash !== calculatedHash) {
     console.log("=== hash value is not the same in user register post api ===");
-    status.msg = "You arn't the correct account!";
+    status.msg = "Incorrect account!";
     res.json(status);
     return;
   }
@@ -69,7 +69,7 @@ app.get("/api/users/register", async (req, res) => {
   });
   if (isDouble) {
     console.log("=== email exist ===");
-    status.msg = "Email Exist!";
+    status.msg = "Email Already Exist!";
     res.json(status);
     return;
   } else {
@@ -91,7 +91,7 @@ app.get("/api/users/login", async (req, res) => {
 
   if (!connectedDB) {
     console.log("=== mongodb connection is not established yet ===");
-    status.msg = "Connection failed!";
+    status.msg = "DB Connection failed!";
     res.json(status);
     return;
   }
@@ -114,7 +114,7 @@ app.get("/api/users/login", async (req, res) => {
       "=== hash value is not the same in account login post api ===",
       status
     );
-    status.msg = "You arn't the correct account!";
+    status.msg = "Incorrect account!";
     res.json(status);
     return;
   }
@@ -135,9 +135,9 @@ app.get("/api/users/login", async (req, res) => {
     res.json(status);
   } else {
     if (isDouble) {
-      status.msg = "Please enter the correct password!";
+      status.msg = "Incorrect password!";
     } else {
-      status.msg = "Please enter the correct email!";
+      status.msg = "Incorrect email!";
     }
     res.json(status);
   }
