@@ -231,7 +231,7 @@ app.get("/api/admin/update/:id", async (req, res) => {
   res.json(status);
 });
 
-app.delete("/api/admin/:id", async (req, res) => {
+app.get("/api/admin/delete/:id", async (req, res) => {
   console.log("=== admin delete api is called ===", req.params.id);
   const userId = parseInt(req.params.id);
   console.log("userId", userId);
